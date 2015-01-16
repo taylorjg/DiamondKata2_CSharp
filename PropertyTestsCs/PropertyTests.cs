@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DiamondLib;
 using FsCheck;
@@ -17,7 +15,7 @@ namespace PropertyTestsCs
         [NUnit.Framework.SetUp]
         public void SetUp()
         {
-            Arb.register<MyArbitraries>();
+            Arb.register<OverrideDefaultCharArbitrary>();
         }
 
         [Property]
@@ -42,31 +40,6 @@ namespace PropertyTestsCs
             return Spec
                 .ForAny(property)
                 .Build();
-        }
-
-        private static readonly Gen<char> GenUpperCaseAlphaChar = Any.ValueIn(Enumerable.Range('A', 26).Select(Convert.ToChar));
-
-        private class UpperCaseAlphaCharArbitrary : Arbitrary<char>
-        {
-            public override Gen<char> Generator
-            {
-                get { return GenUpperCaseAlphaChar; }
-            }
-
-            public override IEnumerable<char> Shrinker(char c)
-            {
-                return Arb.Default.Char().Shrinker(c);
-            }
-        }
-
-        [SuppressMessage("ReSharper", "UnusedMember.Local")]
-        [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]
-        private class MyArbitraries
-        {
-            public static Arbitrary<char> UpperCaseAlphaChar()
-            {
-                return new UpperCaseAlphaCharArbitrary();
-            }
         }
     }
 }
