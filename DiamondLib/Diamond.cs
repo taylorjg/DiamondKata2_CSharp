@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DiamondLib
 {
@@ -6,12 +8,14 @@ namespace DiamondLib
     {
         public static IEnumerable<string> GenerateLines(char inputChar)
         {
-            return new[]
-            {
-                " A ",
-                "B B",
-                " A "
-            };
+            var squareSize = CalculateSquareSize(inputChar);
+            var line = new String(' ', squareSize);
+            return Enumerable.Repeat(line, squareSize);
+        }
+
+        public static int CalculateSquareSize(char inputChar)
+        {
+            return (inputChar - 'A') * 2 + 1;
         }
     }
 }

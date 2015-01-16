@@ -15,9 +15,9 @@ namespace PropertyTestsCs
             get { return GenUpperCaseAlphaChar; }
         }
 
-        public override IEnumerable<char> Shrinker(char c)
-        {
-            return Arb.Default.Char().Shrinker(c);
-        }
+        // public override IEnumerable<char> Shrinker(char c)
+        // {
+        //     return Arb.Default.Char().Shrinker(c);
+        // }
     }
 }

@@ -53,7 +53,18 @@ namespace PropertyTestsCs
             return Spec.ForAny(property).Build();
         }
 
-        private static IEnumerable<string> TransformLines(IReadOnlyList<string> lines)
+        [FsCheck.NUnit.Property]
+        public Property SquareSizeShouldBeRelatedToTheInputCharProperty()
+        {
+            PropertyFunc property = c =>
+            {
+                var squareSize = Diamond.CalculateSquareSize(c);
+                return Diamond.GenerateLines(c).Count() == squareSize;
+            };
+            return Spec.ForAny(property).Build();
+        }
+
+        private static IEnumerable<string> TransformLines(IReadOnlyCollection<string> lines)
         {
             var transformedLines = new List<string>();
             for (var colIndex = 0; colIndex < lines.Count; colIndex++) transformedLines.Add(lines.Aggregate(string.Empty, (line, row) => line + row[colIndex]));
