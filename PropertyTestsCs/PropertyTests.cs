@@ -1,45 +1,63 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DiamondLib;
 using FsCheck;
 using FsCheck.Fluent;
-using FsCheck.NUnit;
+using NUnit.Framework;
 
 namespace PropertyTestsCs
 {
+    using PropertyFunc = Func<char, bool>;
     using Property =  Gen<Rose<Result>>;
 
-    [NUnit.Framework.TestFixture]
+    [TestFixture]
     public class PropertyTests
     {
-        [NUnit.Framework.SetUp]
+        [SetUp]
         public void SetUp()
         {
             Arb.register<OverrideDefaultCharArbitrary>();
         }
 
-        [Property]
+        [FsCheck.NUnit.Property]
         public Property ResultAlwaysHasAtLeastOneLineProperty()
         {
-            Func<char, bool> property = c => Diamond.GenerateLines(c).Any();
-
-            return Spec
-                .ForAny(property)
-                .Build();
+            PropertyFunc property = c => Diamond.GenerateLines(c).Any();
+            return Spec.ForAny(property).Build();
         }
 
-        [Property]
+        [FsCheck.NUnit.Property]
         public Property ResultIsAlwaysSquareProperty()
         {
-            Func<char, bool> property = c =>
+            PropertyFunc property = c => Diamond.GenerateLines(c).All(line => line.Length == Diamond.GenerateLines(c).ToList().Count);
+            return Spec.ForAny(property).Build();
+        }
+
+        [FsCheck.NUnit.Property]
+        public Property AllLinesAreHorizontallySymetricalProperty()
+        {
+            PropertyFunc property = c => Diamond.GenerateLines(c).All(line => line.SequenceEqual(line.Reverse()));
+            return Spec.ForAny(property).Build();
+        }
+
+        [FsCheck.NUnit.Property]
+        public Property AllLinesAreVerticallySymetricalProperty()
+        {
+            PropertyFunc property = c =>
             {
                 var lines = Diamond.GenerateLines(c).ToList();
-                return lines.All(line => line.Length == lines.Count);
+                var transformedLines = TransformLines(lines);
+                return transformedLines.All(line => line.SequenceEqual(line.Reverse()));
             };
+            return Spec.ForAny(property).Build();
+        }
 
-            return Spec
-                .ForAny(property)
-                .Build();
+        private static IEnumerable<string> TransformLines(IReadOnlyList<string> lines)
+        {
+            var transformedLines = new List<string>();
+            for (var colIndex = 0; colIndex < lines.Count; colIndex++) transformedLines.Add(lines.Aggregate(string.Empty, (line, row) => line + row[colIndex]));
+            return transformedLines;
         }
     }
 }
