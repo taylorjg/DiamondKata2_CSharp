@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DiamondLib;
@@ -13,7 +14,35 @@ namespace PropertyTestsCs
     [NUnit.Framework.TestFixture]
     public class PropertyTests
     {
-        private static readonly Func<char, bool> BasicProperty = c => Diamond.GenerateLines(c).Any();
+        [NUnit.Framework.SetUp]
+        public void SetUp()
+        {
+            Arb.register<MyArbitraries>();
+        }
+
+        [Property]
+        public Property ResultAlwaysHasAtLeastOneLineProperty()
+        {
+            Func<char, bool> property = c => Diamond.GenerateLines(c).Any();
+
+            return Spec
+                .ForAny(property)
+                .Build();
+        }
+
+        [Property]
+        public Property ResultIsAlwaysSquareProperty()
+        {
+            Func<char, bool> property = c =>
+            {
+                var lines = Diamond.GenerateLines(c).ToList();
+                return lines.All(line => line.Length == lines.Count);
+            };
+
+            return Spec
+                .ForAny(property)
+                .Build();
+        }
 
         private static readonly Gen<char> GenUpperCaseAlphaChar = Any.ValueIn(Enumerable.Range('A', 26).Select(Convert.ToChar));
 
@@ -23,44 +52,21 @@ namespace PropertyTestsCs
             {
                 get { return GenUpperCaseAlphaChar; }
             }
+
+            public override IEnumerable<char> Shrinker(char c)
+            {
+                return Arb.Default.Char().Shrinker(c);
+            }
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
+        [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]
         private class MyArbitraries
         {
             public static Arbitrary<char> UpperCaseAlphaChar()
             {
                 return new UpperCaseAlphaCharArbitrary();
             }
-        }
-
-        [Property(Verbose = true, MaxTest = 5)]
-        public bool Property1(char c)
-        {
-            return BasicProperty(c);
-        }
-
-        [Property(Verbose = true, MaxTest = 5, Arbitrary = new[] { typeof(MyArbitraries) })]
-        public bool Property2(char c)
-        {
-            return BasicProperty(c);
-        }
-
-        [Property(Verbose = true, MaxTest = 5)]
-        public Property Property3()
-        {
-            return Spec
-                .For(GenUpperCaseAlphaChar, BasicProperty)
-                .Build();
-        }
-
-        [Property(Verbose = true, MaxTest = 5)]
-        public Property Property4()
-        {
-            Arb.register<MyArbitraries>();
-            return Spec
-                .ForAny(BasicProperty)
-                .Build();
         }
     }
 }

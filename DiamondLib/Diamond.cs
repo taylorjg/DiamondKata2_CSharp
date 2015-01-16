@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DiamondLib
 {
@@ -7,7 +6,12 @@ namespace DiamondLib
     {
         public static IEnumerable<string> GenerateLines(char inputChar)
         {
-            return Enumerable.Empty<string>();
+            return new[]
+            {
+                " A ",
+                "B B",
+                " A "
+            };
         }
     }
 }
